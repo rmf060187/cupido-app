@@ -1,0 +1,68 @@
+service: cupido-app
+
+plugins:
+  - serverless-offline
+
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+      Resource: 'arn:aws:dynamodb:us-east-1:554661219498:table/MENSAGENS'
+
+
+functions:
+  listarMensagens:
+    handler: handler.listarMensagens
+    events:
+      - http:
+          path: infoMensagens
+          method: get
+
+  obterMensagem:
+    handler: handler.obterMensagem
+    events:
+      - http:
+          path: infoMensagens/{mensagemId}
+          method: get
+
+  cadastrarMensagem:
+    handler: handler.cadastrarMensagem
+    events:
+      - http:
+          path: infoMensagens
+          method: post
+
+  excluirMensagem:
+    handler: handler.excluirMensagem
+    events:
+      - http:
+          path: infoMensagens/{mensagemId}
+          method: delete
+
+resources:
+  Resources:
+    PacientesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: MENSAGENS
+        AttributeDefinitions:
+          - AttributeName: mensagem_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: mensagem_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
